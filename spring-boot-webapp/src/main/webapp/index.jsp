@@ -7,21 +7,23 @@
 	<link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
 	<link rel="stylesheet" href="https://www.w3schools.com/lib/w3-colors-food.css">
 	<link rel="stylesheet" href="https://www.w3schools.com/lib/w3-colors-flat.css">
+	<link rel="stylesheet" href="https://www.w3schools.com/lib/w3-colors-metro.css">
+	<link rel="stylesheet" href="https://www.w3schools.com/lib/w3-colors-ios.css">
 	
 	<body class="w3-food-aubergine">
 		<!-- topnav -->
-		<div class="w3-row-padded w3-flat-wet-asphalt" style="margin: 14px; height: 75px; border-radius: 15px"> <!-- height: 6em or 75px-->
+		<div class="w3-row-padded w3-flat-wet-asphalt" style="margin: 14px; height: 75px; border-radius: 15px">
 			<!-- home button -->
 			<div class="w3-col w3-display-container" style="width: 15%; height: 100%">
-				<button class="w3-btn w3-round w3-flat-wet-asphalt w3-border w3-border-purple w3-display-middle w3-xlarge w3-wide" style="color: purple">home</button>
+				<button class="w3-btn w3-round w3-flat-wet-asphalt w3-display-middle w3-xlarge w3-wide" style="color: #fc03f4; border-color: #fc03f4; border: 2px solid">home</button>
 			</div>
 			<!-- Title -->
 			<div class="w3-col" style="width: 70%; height: 100%">
-				<h1 style="text-align: center; letter-spacing: 4px; -webkit-text-stroke-width: 1px; -webkit-text-stroke-color: purple; font-size: 38px"><b>NATURAL? OR NATURALLY MISHANDLED?</b></h1>
+				<h1 style="text-align: center; letter-spacing: 4px; -webkit-text-stroke-width: 1px; -webkit-text-stroke-color: #fc03f4; font-size: 38px"><b>NATURAL? OR NATURALLY MISHANDLED?</b></h1>
 			</div>
 			<!-- about button -->
 			<div class="w3-col w3-display-container" style="width: 15%; height: 100%">
-				<button class="w3-btn w3-round w3-flat-wet-asphalt w3-border w3-border-purple w3-display-middle w3-xlarge w3-wide" style="color: purple">about</button>
+				<button class="w3-btn w3-round w3-flat-wet-asphalt w3-display-middle w3-xlarge w3-wide" style="color: #fc03f4; border-color: #fc03f4; border: 2px solid">about</button>
 			</div>
 		</div>
 		
@@ -29,10 +31,10 @@
 		<div class="w3-row-padded" style="margin: 14px; height: 420px; border-radius: 15px"> 
 			<!-- dropdowns and political party -->
  			<div class="w3-col w3-border w3-border-white" style="width: 39.5%; height: 100%; border-radius: 15px; margin-right: 0.5%">
-				<div class="w3-padded-row" style="height: 15%">
+				<div class="w3-padded-row " style="height: 15%; border-radius: 15px">
 					<!-- state dropdown -->
-				  	<div class="w3-dropdown-hover" style="width: 95%; margin: 14px;">
-				   		<button class="w3-btn w3-round w3-black" style="width: 100%">Search for a State</button>
+				  	<div class="w3-dropdown-hover" style="width: 95%; margin: 14px; background-color: #380d45">
+				   		<button class="w3-button w3-round-large w3-ios-background w3-border w3-border-orange" style="width: 100%"><span class="w3-wide" style="color:#fc883a; text-shadow: 2px 2px white"><b>Search for a State</b></span></button>
 				    	<div class="w3-dropdown-content w3-bar-block w3-card w3-light-grey" style="width: 100%;" id="myDIV">
 				     		<input class="w3-input w3-padding" type="text" placeholder="Search..." id="myInput" onkeyup="myFunction()">
 							<a class="w3-bar-item w3-button" href="">Alabama</a>
@@ -50,8 +52,8 @@
 				
 				<!-- year dropdown -->
 				<div class="w3-row-padded" style="height: 15%">
-					<div class="w3-dropdown-hover" style="width: 95%; margin: 14px;">
-				    <button class="w3-btn w3-round w3-black" style="width: 100%">Search for a Year</button>
+					<div class="w3-dropdown-hover" style="width: 95%; margin: 14px; background-color: #380d45">
+				    <button class="w3-button w3-round-large w3-ios-background w3-border w3-border-orange" style="width: 100%"><span class="w3-wide" style="color:#fc883a; text-shadow: 2px 2px white"><b>Search for a Year</b></span></button>
 				    <div class="w3-dropdown-content w3-bar-block w3-card w3-light-grey" style="width: 100%;" id="myDIV">
 				    	<input class="w3-input w3-padding" type="text" placeholder="Search..." id="myInput" onkeyup="myFunction()">
 						<a class="w3-bar-item w3-button" href="">1980</a>
