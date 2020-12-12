@@ -1,0 +1,19 @@
+drop view i_length;
+
+-- Can I group disasters by beginning date? -> Are there any incidents that begin on the same day, but in different states? 
+-- YES, cannot group by beginning date only
+create view i_length as
+select state, incident_type, incident_begin_date, incident_end_date, datediff(incident_end_date, incident_begin_date) as 'incident_length'
+from i_range
+group by state, incident_type, incident_begin_date, incident_end_date -- new grouping strategy
+order by state asc;
+
+select * from i_length;
+
+-- how long did each incident typically last in each state from 2011-2015
+-- 2011-2015 considered from i_length (created using i_range)
+-- typically last = average length
+-- each incident in each state -> group by state and incident type
+select state, incident_type, avg(incident_length) as avg_length_days, avg(incident_length)/365*100 as percent_of_year
+from i_length
+group by state, incident_type;
