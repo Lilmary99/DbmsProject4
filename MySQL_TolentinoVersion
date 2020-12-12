@@ -1,3 +1,15 @@
+-- how long did each incident typically last in each state from 2011-2015?
+-- incidents from 2011-2015
+drop view i_range;
+
+create or replace view i_range as
+select *
+from incedents 
+where 
+    year(incident_begin_date) > 2010
+    and year(incident_end_date) < 2016
+    and incident_end_date not like 'NA';
+
 drop view i_length;
 
 -- Can I group disasters by beginning date? -> Are there any incidents that begin on the same day, but in different states? 
