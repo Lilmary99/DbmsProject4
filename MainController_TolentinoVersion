@@ -1,0 +1,273 @@
+package com.redteam.term;
+import java.sql.Connection;
+import java.sql.Date;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.text.DateFormat;
+import java.text.DecimalFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.TimeZone;
+
+import com.google.gson.Gson;
+import com.redteam.term.StateAndYear;
+
+import javax.servlet.http.HttpServletRequest;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.servlet.ModelAndView;
+ 
+@Controller
+public class MainController {
+	
+	private static Connection connect = null;//holds the database connection
+    private static Statement statement = null;//holds the query for the database
+    private static ResultSet resultSet = null;//holds the results of the query from the database
+    
+   StateAndYear sy = new StateAndYear();
+
+@RequestMapping(value = "/index", method = RequestMethod.POST)
+public void getStateAndYear(@ModelAttribute("stateBean") StateAndYear sy, Model model, @RequestParam String state, @RequestParam String year) throws SQLException, ParseException {
+	System.out.println(state + ": " + year);
+	//connection url
+			//String url = "jdbc:mysql://127.0.0.1:3306/mydb?useUnicode=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC&useSSL=false&allowPublicKeyRetrieval=true&user=root";
+			
+	
+			try {
+				//change password to your password
+				Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/mydb","root","password"); 
+
+				
+				// Statements allow to issue SQL queries to the database
+		        statement = connection.createStatement();
+		        
+		     // Result set get the result of the SQL query
+		 //TODO: Should states actually come from state_spending table?
+		        resultSet = statement.executeQuery("SELECT state FROM incedents");
+		       
+		        //PULL STATES FROM DB
+		        List<String> states = new ArrayList<String>();
+		        ResultSetMetaData rsmd = resultSet.getMetaData();
+		    	int columnsNumber = rsmd.getColumnCount();
+		    	while (resultSet.next()) {
+		    		for (int i = 1; i <= columnsNumber; i++) {
+		    			//System.out.println(resultSet.getString(i));
+		    			if (!states.contains(resultSet.getString(i))) {
+		    				states.add(resultSet.getString(i));
+		    			}
+		    		}//for
+		        }//while	
+		    	
+		    	model.addAttribute("states", states);
+		    	
+		    	
+		    	resultSet = statement.executeQuery("SELECT " + year + ",Party FROM state_spending WHERE state='"+state+"'");
+		    	String party = "";
+		    	rsmd = resultSet.getMetaData();
+		    	columnsNumber = rsmd.getColumnCount();
+		    	while (resultSet.next()) {
+		    		for (int i = 1; i <= columnsNumber; i++) {
+		    			if (rsmd.getColumnName(i).equals("Party")) {
+		    				party = resultSet.getString(i);
+		    			}
+		    		}//for
+		        }//while	
+		    	model.addAttribute("party", party);
+		    	
+		    	//CONFIGURES RELIEF SPENDING GRAPH
+		    	resultSet = statement.executeQuery("SELECT `2011`,`2012`,`2013`,`2014`,`2015` FROM state_spending WHERE (state='"+state+"') and (party='"+party+"')");
+
+		    	Gson gsonObj = new Gson();
+		    	Map<Object,Object> map = null;
+		    	List<Map<Object,Object>> list = new ArrayList<Map<Object,Object>>();
+		    	
+		    	rsmd = resultSet.getMetaData();
+		    	columnsNumber = rsmd.getColumnCount();
+		    	while (resultSet.next()) {
+		    		for (int i = 1; i <= columnsNumber; i++) {
+		    			
+		    			SimpleDateFormat format = new SimpleDateFormat("yyyy", Locale.US);
+		    			format.setTimeZone(TimeZone.getTimeZone("UTC"));
+		    			
+		    			java.util.Date date = format.parse((Integer.parseInt(rsmd.getColumnName(i))+1)+"");
+		    			
+
+		    			long millis = date.getTime();
+		    			map = new HashMap<Object,Object>(); map.put("x", millis); map.put("y", resultSet.getDouble(i)); list.add(map);
+		    			
+		    		}//for
+		        }//while	
+		    	String dataPoints = gsonObj.toJson(list);
+		    	System.out.println(dataPoints);
+		    	model.addAttribute("dataPoints", dataPoints);
+		    	
+		    	//INFERENCE 2
+		    	//make an intermediate view
+		    	System.out.println("selected state is: " + state);
+		    	PreparedStatement p = 
+		    			connection.prepareStatement("create or replace view incident_stats as\n"
+		    					+ "select state, incident_type, avg(incident_length) as avg_length_days, avg(incident_length)/365.25*100 as percent_of_year\n"
+		    					+ "from i_length\n"
+		    					+ "where state = ?\n"
+		    					+ "group by incident_type");
+		    	p.setString(1, state);
+		    	p.executeUpdate();
+		    	
+		    	//an aggregate query for the previous view
+		    	p = connection.prepareStatement
+		    			("select state, avg(avg_length_days) as avg_incident_length, avg(percent_of_year) as avg_percent_of_year\n"
+		    					+ "from incident_stats");
+				ResultSet r = p.executeQuery();
+				
+				//inference variables
+				String percentOfYear = "";
+				String likelihood = "";
+				
+				String pattern = "###.##";
+				DecimalFormat decimalFormat = new DecimalFormat(pattern);
+
+				//set likelihood based on natural disaster duration percent of year
+				while (r.next()) {
+					if(r.getDouble(3) < 10) {
+						likelihood = "not";
+					} else if (r.getDouble(3) >= 10 && r.getDouble(3) < 25) {
+						likelihood = "somewhat";
+					} else if (r.getDouble(3) >= 25 && r.getDouble(3) < 50) {
+						likelihood = "likely";
+					} else if (r.getDouble(3) >= 50 && r.getDouble(3) < 75) {
+						likelihood = "very";
+					} else if (r.getDouble(3) >= 75) {
+						likelihood = "extremely";
+					}
+					
+					//get the percent of year
+					percentOfYear = decimalFormat.format(r.getDouble(3));
+				}
+				
+				//set the inference to be displayed to the user
+				String inf2 = "It is safe to assume that property owners are " 
+						+ likelihood + 
+						" likely to purchase property insurance in "
+						+ state + 
+						" given that natural disasters occur on average "
+						+ percentOfYear +
+						"% of the year.";
+				
+				//add inference to the front end
+				model.addAttribute("inf2", inf2);
+				//end of inference 2
+		       
+			}
+		    catch(SQLException ex) {
+				System.out.println("SQLException: " + ex.getMessage());
+	            System.out.println("SQLState: " + ex.getSQLState());
+	            System.out.println("VendorError: " + ex.getErrorCode());
+	        	throw ex;
+	        } //catch
+
+}
+
+	@RequestMapping(value = { "/index" }, method = RequestMethod.GET)
+	  public String index(Model model) throws SQLException {
+		model.addAttribute("stateBean", sy);
+		//model.addAttribute("year", year);
+		 //connection url
+		String url = "jdbc:mysql://127.0.0.1:3306/mydb?useUnicode=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC&useSSL=false&allowPublicKeyRetrieval=true&user=root";
+		
+		try {
+			Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/mydb","root","password"); //change password to your password
+
+			
+			// Statements allow to issue SQL queries to the database
+	        statement = connection.createStatement();
+	        
+	     // Result set get the result of the SQL query
+	 //TODO: Should states actually come from state_spending table?
+	        resultSet = statement.executeQuery("SELECT state FROM incedents");
+	       
+	        //PULL STATES FROM DB
+	        List<String> states = new ArrayList<String>();
+	        ResultSetMetaData rsmd = resultSet.getMetaData();
+	    	int columnsNumber = rsmd.getColumnCount();
+	    	while (resultSet.next()) {
+	    		for (int i = 1; i <= columnsNumber; i++) {
+	    			//System.out.println(resultSet.getString(i));
+	    			if (!states.contains(resultSet.getString(i))) {
+	    				states.add(resultSet.getString(i));
+	    			}
+	    		}//for
+	        }//while	
+	    	
+	    	model.addAttribute("states", states);
+	    	
+	    	
+	       
+		}
+	    catch(SQLException ex) {
+			System.out.println("SQLException: " + ex.getMessage());
+            System.out.println("SQLState: " + ex.getSQLState());
+            System.out.println("VendorError: " + ex.getErrorCode());
+        	throw ex;
+        } //catch
+      
+		
+		return "index";
+		
+	  }
+	
+	 /**
+		 * This method can print a result set, used for testing and checking result sets
+		 * 
+		 * @param resultSet holds the results of the query from the database
+		 * @throws SQLException to detail the fault in printing the result set
+		 */
+		public static void writeResultSet(ResultSet resultSet) throws SQLException {
+	        // ResultSet is initially before the first data set
+	    	ResultSetMetaData rsmd = resultSet.getMetaData();
+	    	int columnsNumber = rsmd.getColumnCount();
+	    	while (resultSet.next()) {
+	    		for (int i = 1; i <= columnsNumber; i++) {
+	    		System.out.println(resultSet.getString(i) + " " + rsmd.getColumnName(i));
+	    		}//for
+	        }//while	
+	    }//writeResultSet
+		
+		/**
+		 * A simple method that closes resultSet, statement, and the connection
+		 */
+		public static void close() {
+	        try {
+	            if (resultSet != null) {
+	                resultSet.close();
+	            }
+
+	            if (statement != null) {
+	                statement.close();
+	            }
+
+	            if (connect != null) {
+	                connect.close();
+	            }
+	        } catch (Exception e) {
+
+	        }
+	    }
+		
+}
