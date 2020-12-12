@@ -49,14 +49,13 @@
  			<div class="w3-col w3-border w3-border-white" style="width: 39.5%; height: 100%; border-radius: 15px; margin-right: 0.5%">
 			
 					<!-- state dropdown -->
-					<form:form modelAttribute="stateBean" action="/index" onsubmit="return false;" method="post">
-						<label style="font-size: 2vw; padding: 0px; margin: 14px; text-align: center; letter-spacing: 2px;" for="stateLabel">Choose a state:</label>
+					<form:form modelAttribute="stateBean" action="/index" onsubmit="return false;" method="post" style="margin: 30px 0px">
+						<label style="font-size: 2vw; padding: 0px; margin: 14px; text-align: center; letter-spacing: 2px; color: #fc883a" for="stateLabel">Choose a state:</label>
 						<form:select class="selectpicker" id="stateSelect" path="state">
 								<form:option  value="None">None</form:option>
 								<form:options items="${states}"></form:options>
 						</form:select>	
 						
-						<br>
 						
 					<!-- year dropdown -->
 						<label style="font-size: 2vw; padding: 0px; margin: 14px; text-align: center; letter-spacing: 2px; color: #fc883a" for="stateLabel">Choose a year:</label>
@@ -68,19 +67,11 @@
 								<form:option  value="2014">2014</form:option>
 								<form:option  value="2015">2015</form:option>
 						</form:select>	
-						<br>
-						<br>
-						<input style="background-color: WHITE;
-        border: none;
-        -webkit-border-radius: 2px;
-        color: black;
-        padding: 10px 15px;
-        text-decoration: none;
-        margin: 4px 2px;
-        cursor: pointer;" onclick="this.form.submit();" type="submit" value="Submit!"/>
+
+						<input style="background-color: WHITE; color: black; padding: 10px 15px; border: orange; -webkit-border-radius: 2px; text-decoration: none; margin: 15px 15px; cursor: pointer;" onclick="this.form.submit();" type="submit" value="Submit!"/>
 					</form:form>				      
-				<br>
-				<p style="font-size: 2vw; padding: 0px; margin: 0px; text-align: center; letter-spacing: 2px;">You have selected: <br> <b id="user-preference"> ${stateBean.state} -  ${stateBean.year}</b></p>
+					
+				<p style="font-size: 2vw; padding: 0px; margin: 0px; text-align: center; letter-spacing: 2px;">You have selected: <br> <b style="font-size: 3vw" id="user-preference"> ${stateBean.state} -  ${stateBean.year}</b></p>
 
 			</div>
 
@@ -125,17 +116,16 @@
 		<div class="w3-padded-row" style="margin: 14px; height: 190px; border-radius: 15px">
 			<!-- political party -->
  				<div class="w3-col w3-border w3-border-white" style="width: 39.5%; height: 100%; border-radius: 15px; margin-right: 0.5%;">
-					<div class="w3-container" style="height: 100%;">
-						<!-- <h2 style="text-align: center; margin: 30px 0px; letter-spacing: 2px; font-size: 70px; color: #ff3636; text-shadow: 3px 3px white"><i>REPUBLICAN</i></h2> -->
-						<h2 style="text-align: center; margin: 30px 0px; letter-spacing: 2px; font-size: 5vw; color: #32a7fa; text-shadow: 3px 3px white"><i>${party}</i></h2>
+					<div class="w3-container" style="height: 100%;">					
+						<h2 style="text-align: center; margin: 38px 0px; letter-spacing: 2px; font-size: 6vw; text-shadow: 3px 3px white; font-style: italic;" id="party">${party}</h2>
 					</div>
 				</div>
 			<!-- inferences -->
 			<div class="w3-col w3-border w3-border-white w3-container" style="width: 59.5%; height: 100%; border-radius: 15px; margin-left: 0.5%">
-				<h2 style="letter-spacing: 2px;">INFERENCES</h2>
+				<h2 style="letter-spacing: 2px; font-style: italic">INFERENCES</h2>
 				<ul class="w3-ul" style="width:100%; height: 100%; list-style-type: '*';">
 				  	<li>inference 1</li>
-				 	<li><i>${inf2}</i></li>
+				 	<li>${inf2}</li>
 				 	<li>inference 3</li>
 				</ul>
 			</div>
@@ -144,7 +134,14 @@
 	</body>
 
 	<script>
-	
-	// Filter
+		var partyTag = document.getElementById("party");
+		var partyText = partyTag.innerHTML;
+		
+		if (partyText == "Republican") {
+			partyTag.style.color = "#ff3636";
+		} else if (partyText == "Democrat") {
+			partyTag.style.color = "#3495eb";
+		}
+		
 	</script>
 </html>
