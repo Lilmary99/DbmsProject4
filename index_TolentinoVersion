@@ -35,7 +35,7 @@
 			</div>
 			<!-- Title -->
 			<div class="w3-col" style="width: 70%; height: 100%">
-				<h1 style="text-align: center; letter-spacing: 4px; -webkit-text-stroke-width: 1px; -webkit-text-stroke-color: purple; font-size: 38px"><b>NATURAL? OR NATURALLY MISHANDLED?</b></h1>
+				<h1 style="text-align: center; letter-spacing: 4px; -webkit-text-stroke-width: 1px; -webkit-text-stroke-color: purple; font-size: 36px"><b>NATURAL? OR NATURALLY MISHANDLED?</b></h1>
 			</div>
 			<!-- about button -->
 			<div class="w3-col w3-display-container" style="width: 15%; height: 100%">
